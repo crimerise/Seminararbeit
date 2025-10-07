@@ -1,3 +1,22 @@
+Node.js Express backend for Seminararbeit
+
+Structure:
+- server.js - application entry
+- db/ - database connection (pg Pool)
+- models/ - database access functions
+- controllers/ - request handlers
+- routes/ - express routers
+
+Endpoints:
+- GET /api/users -> { success: true, data: [ ...users ] }
+- GET /api/users/:id -> { success: true, data: { id, name, email } }
+
+Setup:
+1. Copy `.env.example` to `.env` and set `DATABASE_URL`.
+2. Install dependencies: `npm install`.
+3. Run in dev: `npm run dev` (requires nodemon) or `npm start`.
+
+The endpoints expect a `users` table with at least columns: id (int), name (text), email (text).
 # Node.js Express Backend
 
 ## Setup
