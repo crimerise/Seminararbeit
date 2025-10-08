@@ -1,0 +1,48 @@
+# Node
+node_modules/
+**/node_modules/
+
+# Environment
+.env
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# OS files
+.DS_Store
+
+# Editor directories
+.vscode/
+.idea/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+/.expo/
+.expo-shared/
+
+# iOS/Android / Expo
+ios/Pods/
+ios/DerivedData/
+android/.gradle/
+android/app/build/
+
+# Coverage
+coverage/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Temporary
+tmp/
+temp/
+?.swp
