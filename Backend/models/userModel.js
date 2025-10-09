@@ -11,27 +11,32 @@ async function getUserById(id) {
 }
 
 async function getUserByEmail(email) {
-  const res = await db.query('SELECT user_id, name, email, hashed_password, reset_token, reset_expires_at FROM users WHERE email = $1', [email]);
+  const res = await db.query('SELECT user_id, name, email, password_hash, pw_reset_token, reset_token_timeout FROM users WHERE email = $1', [email]);
   return res.rows[0] || null;
 }
 
 async function getUserByResetToken(token) {
-  const res = await db.query('SELECT user_id, name, email FROM users WHERE reset_token = $1 AND reset_expires_at > now()', [token]);
+  const res = await db.query('SELECT user_id, name, email FROM users WHERE pw_reset_token = $1 AND reset_token_timeout > now()', [token]);
   return res.rows[0] || null;
 }
 
 async function setResetToken(userId, token, expiresAt, client) {
-  const q = 'UPDATE users SET reset_token = $1, reset_expires_at = $2 WHERE user_id = $3';
+  const q = 'UPDATE users SET pw_reset_token = $1, reset_token_timeout = $2 WHERE user_id = $3';
   if (client) return client.query(q, [token, expiresAt, userId]);
   return db.query(q, [token, expiresAt, userId]);
 }
 
 async function updatePassword(id, hashedPassword, client) {
-  const q = 'UPDATE users SET hashed_password = $1, reset_token = NULL, reset_expires_at = NULL, updated_at = now() WHERE user_id = $2';
+  const q = 'UPDATE users SET password_hash = $1, pw_reset_token = NULL, reset_token_timeout = NULL, updated_at = now() WHERE user_id = $2';
   if (client) return client.query(q, [hashedPassword, id]);
   return db.query(q, [hashedPassword, id]);
 }
 
+async function createUser(name, email, hashedPassword) {
+  const q = `INSERT INTO users (name, email, password_hash, created_at, updated_at) VALUES ($1, $2, $3, now(), now()) RETURNING user_id, name, email`;
+  const res = await db.query(q, [name, email, hashedPassword]);
+  return res.rows[0];
+}
 module.exports = {
   getAllUsers,
   getUserById,
@@ -39,4 +44,5 @@ module.exports = {
   getUserByResetToken,
   setResetToken,
   updatePassword,
+    createUser,
 };
