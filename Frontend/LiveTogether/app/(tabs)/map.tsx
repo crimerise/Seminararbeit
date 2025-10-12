@@ -6,7 +6,7 @@ import {
     Modal,
     Text,
     TextInput,
-    TouchableOpacity,
+    TouchableOpacity, Keyboard,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import SearchBar from "@/components/SearchBar";
@@ -21,7 +21,6 @@ const initialRegion = {
     longitudeDelta: 0.1,
 };
 
-
 const Map = () => {
     const [markers, setMarkers] = useState<MarkerType[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -30,7 +29,45 @@ const Map = () => {
     const [description, setDescription] = useState("");
     const [emoji, setEmoji] = useState<string>("🌲");
 
-    // load markers at start from DB
+    // 🔍 NEU: Suchbegriff
+    const [searchQuery, setSearchQuery] = useState<string>("");
+//-------------------   Autocomplete    ------------------
+    const [showSuggestions, setShowSuggestions] = useState(true);
+    const [isSearchActive, setIsSearchActive] = useState(false);
+
+
+    // einmalig nach dem Laden oder wenn markers sich ändern:
+    const uniqueTitles = React.useMemo(() => {
+        // unique, trim, filter empty
+        const titles = markers
+            .map(m => (m.title ?? "").trim())
+            .filter(t => t.length > 0);
+        return Array.from(new Set(titles)); // unique
+    }, [markers]);
+
+// Vorschläge (z. B. "Amazon-like": startsWith), case-insensitive, max 5
+    const suggestions = React.useMemo(() => {
+        if (!searchQuery || searchQuery.trim().length === 0) return [];
+        const q = searchQuery.toLowerCase().trim();
+        return uniqueTitles
+            .filter(title => title.toLowerCase().startsWith(q))
+            .slice(0, 5);
+    }, [uniqueTitles, searchQuery]);
+
+// Handler wenn ein Vorschlag ausgewählt wird
+    const handleSelectSuggestion = (suggestion: string) => {
+        if (suggestion) {
+            setSearchQuery(suggestion);
+        }
+        setShowSuggestions(false); // egal ob leer oder Vorschlag -> Liste weg
+        Keyboard.dismiss();
+        setIsSearchActive(false);
+
+    };
+
+
+
+    // Lade Marker beim Start
     useEffect(() => {
         const loadMarkers = async () => {
             try {
@@ -43,7 +80,7 @@ const Map = () => {
         loadMarkers();
     }, []);
 
-    // open modal if map clicked
+    // Öffnet Modal beim Klick auf die Map
     const handleMapPress = (e: any) => {
         const { latitude, longitude } = e.nativeEvent.coordinate;
         setNewMarkerCoords({ latitude, longitude });
@@ -55,7 +92,7 @@ const Map = () => {
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
 
-    // create marker
+    // Speichert neuen Marker
     const handleSaveMarker = async () => {
         if (!newMarkerCoords) return;
 
@@ -69,7 +106,6 @@ const Map = () => {
             endDate: endDate.toISOString(),
         };
 
-        // show local
         setMarkers((prev) => [...prev, newMarker]);
         setModalVisible(false);
 
@@ -89,9 +125,10 @@ const Map = () => {
         setModalVisible(true);
     };
 
-
-
-
+    // 🔍 Filtert Marker nach Suchbegriff (Titel)
+    const filteredMarkers = markers.filter(marker =>
+        marker.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <View style={{ flex: 1 }}>
@@ -104,20 +141,45 @@ const Map = () => {
                 showsCompass={false}
                 showsPointsOfInterest
                 showsBuildings
-                onPress={handleMapPress}
+                onPress={(e) => {
+                    if(isSearchActive) {
+                        setIsSearchActive(false);
+                        setShowSuggestions(false);
+                        Keyboard.dismiss();
+                        return;
+                    }
+                    handleMapPress(e);
+                }}
             >
-                {markers.map((marker, index) => (
-                    <MarkerWithEmoji key={index} marker={marker} onPress={() => handleMarkerPress(marker)} />
+                {filteredMarkers.map((marker) => (
+                    <MarkerWithEmoji
+                        // stable key -> not changing due to filtering
+                        // if no stable key used, emoji falls back to default after applying filter
+                        key={`${marker.latitude}-${marker.longitude}`}
+                        marker={marker}
+                        onPress={() => handleMarkerPress(marker)}
+                    />
                 ))}
 
             </MapView>
 
-            {/* Suchleiste */}
+            {/* 🔍 Suchleiste */}
             <View style={{ marginTop: 50, paddingHorizontal: 16 }}>
-                <SearchBar placeholder="Wandern..." value="" />
+                <SearchBar
+                    placeholder="Suche eine Aktivität"
+                    value={searchQuery}
+                    onChangeText={(text) => {
+                        setSearchQuery(text);
+                        setShowSuggestions(true);
+                        setIsSearchActive(true);
+                    }}
+                    suggestions={suggestions}
+                    showSuggestions={showSuggestions}
+                    onSelectSuggestion={handleSelectSuggestion}
+                />
             </View>
 
-            {/* Modal for marker create */}
+            {/* Modal für neue Marker */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -144,7 +206,7 @@ const Map = () => {
 
                         {/* Emoji Picker */}
                         <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", marginBottom: 12 }}>
-                            {["📍","🌲", "🏔️", "🏕️", "🏃", "🏈", "🏀", "🎾"].map((e) => (
+                            {["📍", "🌲", "🏔️", "🏕️", "🏃", "🏈", "🏀", "🎾"].map((e) => (
                                 <TouchableOpacity
                                     key={e}
                                     onPress={() => setEmoji(e)}
@@ -167,7 +229,6 @@ const Map = () => {
                             }}
                         />
 
-
                         <TouchableOpacity style={styles.button} onPress={handleSaveMarker}>
                             <Text style={{ color: "white", fontWeight: "bold" }}>Speichern & Veröffentlichen</Text>
                         </TouchableOpacity>
@@ -181,7 +242,6 @@ const Map = () => {
                     </View>
                 </View>
             </Modal>
-
         </View>
     );
 };
@@ -227,7 +287,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         borderWidth: 1,
         borderColor: "transparent",
-    }
+    },
 });
 
 export default Map;
