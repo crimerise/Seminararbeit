@@ -1,6 +1,18 @@
 const User = require('../models/userModel');
 const userService = require('../services/userService');
 
+/**
+ * @openapi
+ * /api/users:
+ *   get:
+ *     tags:
+ *       - users
+ *     summary: Get a list of users
+ *     responses:
+ *       200:
+ *         description: A list of users
+ */
+
 async function listUsers(req, res) {
   try {
     const users = await User.getAllUsers();
@@ -27,6 +39,26 @@ async function getUser(req, res) {
   }
 }
 
+/**
+ * @openapi
+ * /api/users/{id}:
+ *   get:
+ *     tags:
+ *       - users
+ *     summary: Get a user by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: A user object
+ *       404:
+ *         description: Not found
+ */
+
 async function requestPasswordReset(req, res) {
   const { email } = req.body;
   if (!email) return res.status(400).json({ success: false, error: 'email required' });
@@ -42,6 +74,29 @@ async function requestPasswordReset(req, res) {
   }
 }
 
+/**
+ * @openapi
+ * /api/users/request-reset:
+ *   post:
+ *     tags:
+ *       - users
+ *     summary: Request a password reset (demo returns token)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Reset email sent (demo)
+ */
+
 async function resetPassword(req, res) {
   const { token, newPassword } = req.body;
   if (!token || !newPassword) return res.status(400).json({ success: false, error: 'token and newPassword required' });
@@ -55,6 +110,32 @@ async function resetPassword(req, res) {
     res.status(500).json({ success: false, error: 'Server error' });
   }
 }
+
+/**
+ * @openapi
+ * /api/users/reset:
+ *   post:
+ *     tags:
+ *       - users
+ *     summary: Reset password using token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token, newPassword]
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset
+ *       400:
+ *         description: Invalid token or password
+ */
 
 module.exports = {
   listUsers,

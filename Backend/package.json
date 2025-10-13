@@ -19,7 +19,9 @@
     "cors": "^2.8.5",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "swagger-ui-express": "^4.6.3",
+    "swagger-jsdoc": "^6.2.8"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

@@ -1,5 +1,36 @@
 const authService = require('../services/authService');
 
+/**
+ * @openapi
+ * /api/auth/register:
+ *   post:
+ *     tags:
+ *       - auth
+ *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email, password]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Created
+ *       400:
+ *         description: Bad request
+ *       409:
+ *         description: Email already in use
+ */
+
 async function login(req, res) {
   const { email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
@@ -12,6 +43,33 @@ async function login(req, res) {
     res.status(500).json({ error: 'Server error' });
   }
 }
+
+/**
+ * @openapi
+ * /api/auth/login:
+ *   post:
+ *     tags:
+ *       - auth
+ *     summary: Login and receive access and refresh tokens
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *       401:
+ *         description: Invalid credentials
+ */
 
 async function register(req, res) {
   try {
@@ -35,6 +93,30 @@ async function refresh(req, res) {
     return res.status(401).json({ error: 'Invalid refresh token' });
   }
 }
+
+/**
+ * @openapi
+ * /api/auth/refresh:
+ *   post:
+ *     tags:
+ *       - auth
+ *     summary: Exchange a refresh token for a new access token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *       401:
+ *         description: Invalid refresh token
+ */
 
 
 async function logout(req, res) {
