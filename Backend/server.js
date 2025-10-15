@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./docs/openapi');
 
 dotenv.config();
 
@@ -16,6 +19,10 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', usersRouter);
+app.use('/api/auth', authRouter);
+
+// Swagger UI
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
