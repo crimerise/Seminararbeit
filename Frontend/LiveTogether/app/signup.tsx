@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
-import {useNavigation, useRouter} from "expo-router";
+import { useRouter } from "expo-router";
 import Icon from "@expo/vector-icons/Ionicons";
-import Signup from "@/app/signup";
 
-export default function LoginScreen() {
+export default function Signup() {
+    const[firstname, setFirstname] = useState("");
+    const[lastname, setLastname] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
-    const navigation = useNavigation();
 
     const handleLogin = () => {
         router.replace("/(tabs)/feed");
@@ -16,7 +16,33 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Login</Text>
+            <Text style={styles.title}>Konto erstellen</Text>
+
+            {/* Vorname Input */}
+            <View style={styles.inputContainer}>
+                <Icon name="person-outline" size={24} color="#888" style={styles.icon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Vorname"
+                    value={firstname}
+                    onChangeText={setFirstname}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
+            </View>
+
+            {/* Nachname Input */}
+            <View style={styles.inputContainer}>
+                <Icon name="person" size={24} color="#888" style={styles.icon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Nachname"
+                    value={lastname}
+                    onChangeText={setLastname}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
+            </View>
 
             {/* E-Mail Input */}
             <View style={styles.inputContainer}>
@@ -32,7 +58,7 @@ export default function LoginScreen() {
             </View>
 
             {/* Passwort Input */}
-            <View style={styles.inputContainerPswd}>
+            <View style={styles.inputContainer}>
                 <Icon name="lock-closed-outline" size={24} color="#888" style={styles.icon} />
                 <TextInput
                     style={styles.input}
@@ -43,23 +69,8 @@ export default function LoginScreen() {
                 />
             </View>
 
-            <View style={{ paddingTop: 5, justifyContent: 'center' }}>
-
-                {/* Hinweis über dem Login */}
-                <Text style={{ fontSize: 15, marginBottom: 30 }}>
-                    Noch kein Konto?{' '}
-                    <Text
-                        style={{ color: 'blue', textDecorationLine: 'underline' }}
-                        onPress={() => router.push("/signup")}
-                    >
-                        Hier
-                    </Text>{' '}
-                    klicken zum Registrieren.
-                </Text>
-                </View>
-
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Einloggen</Text>
+                <Text style={styles.buttonText}>Registrieren</Text>
             </TouchableOpacity>
         </View>
     );
@@ -86,17 +97,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#ddd",
         marginBottom: 16,
-        paddingHorizontal: 12,
-        height: 50,
-    },
-    inputContainerPswd: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#ddd",
-        marginBottom: 5,
         paddingHorizontal: 12,
         height: 50,
     },
