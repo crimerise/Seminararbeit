@@ -9,9 +9,34 @@ export default function Signup() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
+    const [error, setError] = useState('');
+    const [submitted, setSubmitted] = useState(false); // NEU
+
+
 
     const handleLogin = () => {
         router.replace("/(tabs)/feed");
+    };
+
+    const validateEmail = (value) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value) return "Bitte gib eine E-Mail-Adresse ein.";
+        if (!emailRegex.test(value)) return "Bitte gib eine gültige E-Mail-Adresse ein.";
+        return "";
+    };
+
+    const handleSubmit = () => {
+        setSubmitted(true); // zeigt Fehlertexte an
+        const emailError = validateEmail(email);
+
+        if (emailError) {
+            setError(emailError);
+            return; // stoppe Navigation
+        }
+
+        // wenn alles gültig
+        setError("");
+        handleLogin();
     };
 
     return (
@@ -44,8 +69,11 @@ export default function Signup() {
                 />
             </View>
 
-            {/* E-Mail Input */}
-            <View style={styles.inputContainer}>
+            {/* E-Mail */}
+            <View style={
+                [styles.inputContainer,
+                    submitted && error ? styles.inputError : null
+            ]}>
                 <Icon name="mail-outline" size={24} color="#888" style={styles.icon} />
                 <TextInput
                     style={styles.input}
@@ -69,7 +97,10 @@ export default function Signup() {
                 />
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            {/* Nur anzeigen, wenn auf "Registrieren" gedrückt wurde */}
+            {submitted && error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                 <Text style={styles.buttonText}>Registrieren</Text>
             </TouchableOpacity>
         </View>
@@ -100,6 +131,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         height: 50,
     },
+    inputError: {
+        borderColor: 'red',
+    },
     icon: {
         marginRight: 10,
     },
@@ -118,5 +152,9 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         textAlign: "center",
         fontSize: 18,
+    },
+    errorText: {
+        color: 'red',
+        marginBottom: 10,
     },
 });
