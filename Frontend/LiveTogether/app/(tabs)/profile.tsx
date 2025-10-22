@@ -1,98 +1,117 @@
-import {View, Text, Image, FlatList, ActivityIndicator, StyleSheet} from 'react-native'
-import {images} from "@/constants/images";
-import MovieCard from "@/components/MovieCard";
-import {useRouter} from "expo-router";
-import useFetch from "@/services/useFetch";
-import {fetchMovies} from "@/services/api";
-import {icons} from "@/constants/icons";
-import SearchBar from "@/components/SearchBar";
-import {useEffect, useState} from "react";
-import {text} from "node:stream/consumers";
-import {updateSearchCount} from "@/services/appwrite";
-import MapView from "react-native-maps";
+import React, { useState } from "react";
+import {StyleSheet, Text, View, TouchableOpacity, Image, StatusBar} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useUser } from "@/components/UserContext";
+import { useRouter } from "expo-router";
+import {MaterialIcons} from "@expo/vector-icons";
 
+const Profile = () => {
+    const { user, logout } = useUser();
+    const router = useRouter();
+    const [image, setImage] = useState<string | null>(null);
 
-const profile = () => {
+    const handleLogout = () => {
+        logout();
+        router.replace("/login");
+    };
 
-    const [searchQuery, setSearchQuery] = useState('');
+    const pickImage = async () => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permissionResult.granted) {
+            alert("Erlaubnis erforderlich, um Bilder auszuwählen!");
+            return;
+        }
 
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
 
-    const {
-        data: movies,
-        loading,
-        error,
-        refetch: loadMovies,
-        reset,
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
+        }
+    };
 
-        }=useFetch(() => fetchMovies({
-            query: searchQuery,
-        }), false)
-
-    useEffect(() => {
-        const timeoutId = setTimeout( async () => {
-            if (searchQuery.trim()) {
-                await loadMovies();
-            }else {
-                reset()
-            }
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
-    }, [searchQuery]);
-
-    useEffect(() =>{
-        if(movies?.length > 0 && movies?.[0])
-             updateSearchCount(searchQuery, movies[0]);
-    },[movies]);
+    if (!user) return <Text>Kein User angemeldet</Text>;
 
     return (
-        <View className="flex-1 bg-primary">
-            <Image
-                source={images.bg}
-                className="absolute w-full h-full z-0"
-                resizeMode="cover"
-            />
+        <View style={styles.container}>
+            {/* Profilbild */}
+            <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+                {image ? (
+                    <Image source={{ uri: image }} style={styles.profileImage} />
+                ) : (
+                    <View style={styles.placeholder}>
+                        <Text style={styles.placeholderText}>+</Text>
+                    </View>
+                )}
+            </TouchableOpacity>
 
-            <FlatList
-                data={movies}
-                renderItem={({ item }) => <MovieCard {...item} />}
-                keyExtractor={(item) => item.id.toString()}
-                className="px-5"
-                numColumns={3}
-                columnWrapperStyle={{
-                    justifyContent: 'center',
-                    gap: 16,
-                    marginVertical: 16,
-                }}
-                contentContainerStyle={{ paddingBottom: 100 }}
-                ListHeaderComponent={
-                    <>
-                        <View className="w-full flex-row justify-center mt-20 items-center">
-                            <Image source={icons.logo} className="w-12 h-10" />
-                        </View>
+            {/* Name & Email */}
+            <Text style={styles.name}>{user.name}</Text>
+            <Text style={styles.email}>{user.email}</Text>
 
-                        <View className="my-5">
-                            <SearchBar
-                                placeholder="Wandern..."
-                                value={searchQuery}
-                                onChangeText={(text: string) => setSearchQuery(text)}
-                            />
-                        </View>
-
-
-                        <Text className="text-xl text-white font-bold">
-                            Suche Aktivitäten auf der Karte
-                            <Text className="text-accent">{searchQuery}</Text>
-                        </Text>
-
-
-                    </>
-                }
-            />
+            {/* Logout Button */}
+            <TouchableOpacity style={styles.button} onPress={handleLogout}>
+                <MaterialIcons name="logout" size={24} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
         </View>
-    ); // <- diese schließende Klammer hat gefehlt
+    );
 };
 
+export default Profile;
 
-export default profile;
-
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: "center",
+        paddingTop: 100,
+        backgroundColor: "#f8f9fa",
+    },
+    imageContainer: {
+        marginBottom: 20,
+    },
+    profileImage: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+    },
+    placeholder: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: "#ddd",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    placeholderText: {
+        fontSize: 36,
+        color: "#888",
+    },
+    name: {
+        fontSize: 28,
+        fontWeight: "700",
+    },
+    email: {
+        fontSize: 16,
+        color: "#666",
+        marginBottom: 30,
+    },
+    button: {
+        backgroundColor: "#007bff",
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        borderRadius: 12,
+        flexDirection: "row", // Elemente nebeneinander
+        alignItems: "center", // vertikal zentrieren
+        justifyContent: "center", // optional: horizontal zentrieren
+    },
+    buttonText: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 18,
+    },
+});

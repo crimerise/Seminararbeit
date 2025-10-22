@@ -59,6 +59,7 @@ export default function TabsLayout() {
                     headerShown: false,
                     tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={icons.person} title="Profil" />,
                 }}
+
             />
         </Tabs>
     );

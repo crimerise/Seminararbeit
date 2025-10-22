@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import Icon from "@expo/vector-icons/Ionicons";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { TouchableWithoutFeedback, Keyboard } from "react-native";
+import {useUser} from "@/components/UserContext";
 
 
 
@@ -19,6 +20,8 @@ export default function Signup() {
     const [lastNameError, setLastNameError] = useState(false);
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
+    const { login } = useUser();
+
 
 
 
@@ -100,6 +103,10 @@ export default function Signup() {
 
         // wenn alles gültig
         setError("");
+
+        // User Information speichern
+        login(`${firstname.trim()} ${lastname.trim()}`, email.trim())
+
         handleLogin();
     };
 
