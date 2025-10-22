@@ -7,17 +7,27 @@ export default function RootLayout() {
     <>
     <StatusBar hidden={true} />
 
-  <Stack >
-    <Stack.Screen
-        name="(tabs)"
-        options={{headerShown: false,}}
-    />
+      <Stack>
+        // Login first without navbar
+        <Stack.Screen
+            name="login"
+            options={{ headerShown: false }}
+        />
+        // Tabs after Login
+        <Stack.Screen
+            name="(tabs)"
+            options={{ headerShown: false }}
+        />
+        <Stack.Screen
+            name="movies/[id]"
+            options={{ headerShown: false }}
+        />
+        <Stack.Screen
+            name="signup"
+            options={{ headerShown: false }}
+        />
+      </Stack>
 
-    <Stack.Screen
-        name="movies/[id]"
-        options={{headerShown: false,}}
-    />
-    </Stack>
       </>
     );
 }
