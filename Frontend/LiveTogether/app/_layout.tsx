@@ -12,7 +12,10 @@ export default function RootLayout() {
           {/* Login first without navbar */}
           <Stack.Screen
               name="login"
-              options={{ headerShown: false }}
+              options={{
+                  headerShown: false,
+                  statusBarStyle: 'dark'
+              }}
           />
           {/* Tabs after Login */}
           <Stack.Screen
@@ -29,7 +32,10 @@ export default function RootLayout() {
           />
           <Stack.Screen
               name="signup"
-              options={{ headerShown: false }}
+              options={{
+                  headerShown: false,
+                  statusBarStyle: 'dark'
+              }}
           />
 
         </Stack>
