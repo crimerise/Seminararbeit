@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {View, Text, TextInput, TouchableOpacity, StyleSheet, Image} from "react-native";
 import { useRouter } from "expo-router";
 import Icon from "@expo/vector-icons/Ionicons";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { TouchableWithoutFeedback, Keyboard } from "react-native";
 import {useUser} from "@/components/UserContext";
+import * as ImagePicker from "expo-image-picker";
 
 
 
@@ -21,12 +22,31 @@ export default function Signup() {
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
     const { login } = useUser();
-
+    const [image, setImage] = useState<string | null>(null);
 
 
 
     const handleLogin = () => {
         router.replace("/(tabs)/feed");
+    };
+
+    const pickImage = async () => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permissionResult.granted) {
+            alert("Erlaubnis erforderlich, um Bilder auszuwählen!");
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
+        }
     };
 
     const validateEmail = (value) => {
@@ -105,7 +125,7 @@ export default function Signup() {
         setError("");
 
         // User Information speichern
-        login(`${firstname.trim()} ${lastname.trim()}`, email.trim())
+        login(`${firstname.trim()} ${lastname.trim()}`, email.trim(), image ?? undefined);
 
         handleLogin();
     };
@@ -125,6 +145,16 @@ export default function Signup() {
         <View >
             <Text style={styles.title}>Konto erstellen</Text>
 
+            <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+                {image ? (
+                    <Image source={{ uri: image }} style={styles.profileImage} />
+                ) : (
+                    <View style={styles.placeholder}>
+                        <Text style={styles.placeholderText}>+</Text>
+                    </View>
+                )}
+            </TouchableOpacity>
+
             {/* Vorname Input */}
             <View style={
                 [styles.inputContainer,
@@ -136,7 +166,7 @@ export default function Signup() {
                     placeholder="Vorname"
                     value={firstname}
                     onChangeText={setFirstname}
-                    keyboardType="email-address"
+                    keyboardType="default"
                     autoCapitalize="words"
                 />
             </View>
@@ -152,7 +182,7 @@ export default function Signup() {
                     placeholder="Nachname"
                     value={lastname}
                     onChangeText={setLastname}
-                    keyboardType="email-address"
+                    keyboardType="default"
                     autoCapitalize="words"
                 />
             </View>
@@ -212,8 +242,29 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: "700",
-        marginBottom: 40,
+        marginBottom: 30,
         textAlign: "center",
+    },
+    imageContainer: {
+        marginBottom: 20,
+        alignSelf: "center"
+    },
+    profileImage: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+    },
+    placeholder: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: "#ddd",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    placeholderText: {
+        fontSize: 36,
+        color: "#888",
     },
     inputContainer: {
         flexDirection: "row",

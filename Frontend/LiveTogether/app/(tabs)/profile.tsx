@@ -40,14 +40,15 @@ const Profile = () => {
         <View style={styles.container}>
             {/* Profilbild */}
             <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
-                {image ? (
-                    <Image source={{ uri: image }} style={styles.profileImage} />
+                {image || user.image ? (
+                    <Image source={{ uri: image ?? user.image! }} style={styles.profileImage} />
                 ) : (
                     <View style={styles.placeholder}>
                         <Text style={styles.placeholderText}>+</Text>
                     </View>
                 )}
             </TouchableOpacity>
+
 
             {/* Name & Email */}
             <Text style={styles.name}>{user.name}</Text>
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
         marginBottom: 30,
     },
     button: {
-        backgroundColor: "#007bff",
+        backgroundColor: "#FF0800",
         paddingVertical: 14,
         paddingHorizontal: 40,
         borderRadius: 12,
