@@ -385,6 +385,7 @@ async function listPostsByUser(req, res) {
   const posts = await ActivityService.listPostsByUser(userId);
   return res.json({ data: posts });
 }
+
 /**
  * @openapi
  * /api/activities/user/{userId}/posts:
