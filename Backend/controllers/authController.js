@@ -73,9 +73,9 @@ async function login(req, res) {
 
 async function register(req, res) {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ error: 'name,email,password required' });
-    const created = await authService.registerUser(name, email, password);  // hieer ein Fehler!!
+    const { first_name, last_name, email, password } = req.body;
+    if (!first_name || !last_name || !email || !password) return res.status(400).json({ error: 'first Name, last Name,email,password required' });
+    const created = await authService.registerUser(first_name, last_name, email, password);  // hieer ein Fehler!!
     return res.status(201).json({ success: true, user: created });
   } catch (err) {
     if (err.message === 'email_taken') return res.status(409).json({ error: 'email already in use' });
