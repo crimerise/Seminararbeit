@@ -13,9 +13,11 @@ const authService = require('../services/authService');
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, email, password]
+ *             required: [first_name, last_name, email, password]
  *             properties:
- *               name:
+ *               first_name:
+ *                 type: string
+ *               last_name:
  *                 type: string
  *               email:
  *                 type: string
